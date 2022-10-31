@@ -236,10 +236,10 @@ void ui_Screen2_screen_init(void)
 
     ui_Chart1 = lv_chart_create(ui_Screen2);
 
-    lv_obj_set_width(ui_Chart1, 310);	//lv_pct(90)
+    lv_obj_set_width(ui_Chart1, 300);	//lv_pct(90)
     lv_obj_set_height(ui_Chart1, lv_pct(70));
 
-    lv_obj_set_x(ui_Chart1, 0);
+    lv_obj_set_x(ui_Chart1, 12);
     lv_obj_set_y(ui_Chart1, -30);
 
     lv_obj_set_align(ui_Chart1, LV_ALIGN_BOTTOM_MID);
@@ -261,19 +261,21 @@ void ui_Screen2_screen_init(void)
 
     // Copy paste each time
     lv_chart_set_type(ui_Chart1, LV_CHART_TYPE_LINE);
-    lv_chart_set_div_line_count(ui_Chart1, 5, 7);
-    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_Y, 0, 1024);
+    lv_chart_set_div_line_count(ui_Chart1, 4, 9);
+    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 300, 1024);
+    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
 
     lv_chart_set_point_count(ui_Chart1, 288);
 
-    lv_chart_set_axis_tick(ui_Chart1, LV_CHART_AXIS_PRIMARY_X, 10, 5, 9, 2, true, 300);
-    lv_chart_set_axis_tick(ui_Chart1, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 4, 0, false, 400);
+    lv_chart_set_axis_tick(ui_Chart1, LV_CHART_AXIS_PRIMARY_X, 8, 3, 9, 2, true, 300);
+    lv_chart_set_axis_tick(ui_Chart1, LV_CHART_AXIS_PRIMARY_Y, 5, 5, 6, 1, true, 30);
+    lv_chart_set_axis_tick(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 5, 5, 4, 1, true, 20);
 
     lv_obj_set_style_size(ui_Chart1, 0, LV_PART_INDICATOR);	// size of a data point
 
     lv_obj_set_style_line_width(ui_Chart1, 1, LV_PART_ITEMS);	// thickness of a line
 
-     ser1 = lv_chart_add_series(ui_Chart1, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_CHART_AXIS_PRIMARY_Y);
+     ser1 = lv_chart_add_series(ui_Chart1, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_CHART_AXIS_SECONDARY_Y);
     // ser2 = lv_chart_add_series(ui_Chart1, lv_palette_lighten(LV_PALETTE_DEEP_ORANGE, 2), LV_CHART_AXIS_SECONDARY_Y);
     /*Set the next points on 'ser1'*/
     //lv_chart_set_next_value(ui_Chart1, ser1, 5);

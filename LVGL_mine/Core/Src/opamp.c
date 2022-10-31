@@ -41,8 +41,12 @@ void MX_OPAMP1_Init(void)
   hopamp1.Init.Mode = OPAMP_FOLLOWER_MODE;
   hopamp1.Init.NonInvertingInput = OPAMP_NONINVERTINGINPUT_IO0;
   hopamp1.Init.PowerMode = OPAMP_POWERMODE_HIGHSPEED;
-  hopamp1.Init.UserTrimming = OPAMP_TRIMMING_FACTORY;
+  hopamp1.Init.UserTrimming = OPAMP_TRIMMING_USER;
   if (HAL_OPAMP_Init(&hopamp1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_OPAMP_SelfCalibrate(&hopamp1) != HAL_OK)
   {
     Error_Handler();
   }
