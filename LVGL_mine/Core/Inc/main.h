@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-float wavelength(uint16_t pix);
+extern float wavelength(uint16_t pix);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

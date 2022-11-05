@@ -5,7 +5,11 @@
  *      Author: Daniel
  */
 #include "main.h"
+#include <math.h>
 
+float wavelength(uint16_t pix);
+void wavelength_convert(void);
+extern float wavelength_converted[288];
 
 // wavelength correction [nm]
 float wavelength(uint16_t pix){
@@ -15,6 +19,11 @@ float wavelength(uint16_t pix){
 	float wavelength = nm/10.0;	// more efficient to first int * 10, and then convert it to float
 	return wavelength;
 }
+
+void wavelength_convert(void){
+	for(uint16_t i = 1; i <= 288; i++) wavelength_converted[i-1] = wavelength(i);
+}
+
 /*
 
 // C program to find maximum in arr[] of size n

@@ -56,13 +56,15 @@
 
 /* USER CODE BEGIN PV */
 uint16_t adc_buf[ADC_BUF_L];
+float wavelength_converted[288];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
-
+extern void refresh_chart(void);
+extern void wavelength_convert(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -121,14 +123,18 @@ int main(void)
 	HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
 	HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
 
+wavelength_convert();
 
 	ui_init();
 
 	HAL_TIM_Base_Start_IT(&htim3);
 	HAL_TIM_Base_Start(&htim15);
 
+
+
 	HAL_Delay(20);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_L);
+
 
 
   /* USER CODE END 2 */
@@ -235,7 +241,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_2);
-	lv_chart_refresh(ui_Chart1);
+	//lv_chart_refresh(ui_Chart1);
+	refresh_chart();
+
 
 }
 
