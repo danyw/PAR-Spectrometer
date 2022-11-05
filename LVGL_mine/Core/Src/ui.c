@@ -22,6 +22,7 @@ lv_obj_t * ui_Chart1;
 
 extern uint16_t adc_buf[288];
 extern float wavelength_converted[288];
+extern float adc_convert(uint16_t i);
 
 static lv_chart_series_t * ser1;
 void refresh_chart(void);
@@ -45,7 +46,7 @@ void refresh_chart(void);
 void refresh_chart(void){
 	uint16_t i;
 	for(i = 0; i < 288; i++ ){
-		lv_chart_set_next_value2(ui_Chart1, ser1, wavelength_converted[i], adc_buf[i]);
+		lv_chart_set_next_value2(ui_Chart1, ser1, wavelength_converted[i], adc_convert(i));
 	}
 }
 

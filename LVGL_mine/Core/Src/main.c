@@ -56,6 +56,8 @@
 
 /* USER CODE BEGIN PV */
 uint16_t adc_buf[ADC_BUF_L];
+
+
 float wavelength_converted[288];
 /* USER CODE END PV */
 
