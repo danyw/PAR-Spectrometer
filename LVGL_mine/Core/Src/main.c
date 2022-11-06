@@ -66,6 +66,7 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
 extern void refresh_chart(void);
+extern void refresh_chart_y(void);
 extern void wavelength_convert(void);
 /* USER CODE END PFP */
 
@@ -87,7 +88,8 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+
+	HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -151,7 +153,7 @@ wavelength_convert();
 
 		if ((HAL_GPIO_ReadPin(GPIOC, B5_Pin)) == 1){
   	    	HAL_Delay(500);
-
+  	    	__HAL_TIM_SET_AUTORELOAD(&htim2, 10000-1);
 					HAL_TIM_PWM_Init(&htim2);
 					HAL_TIM_PWM_Init(&htim4);
 					//HAL_TIM_OC_Init(&htim4);
@@ -240,11 +242,13 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 
 	HAL_TIM_OC_Stop(&htim4, TIM_CHANNEL_2);
 	HAL_TIM_OC_Stop(&htim4, TIM_CHANNEL_4);
-	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_2);
-	//lv_chart_refresh(ui_Chart1);
-	refresh_chart();
+	//HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
+	//HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+	//HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_2);
+
+	//refresh_chart();
+	refresh_chart_y();
+	__HAL_TIM_CLEAR_FLAG(&htim2,TIM_FLAG_CC2);
 
 
 }

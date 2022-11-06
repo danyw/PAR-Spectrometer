@@ -25,7 +25,9 @@ extern float wavelength_converted[288];
 extern float adc_convert(uint16_t i);
 
 static lv_chart_series_t * ser1;
+
 void refresh_chart(void);
+void refresh_chart_y(void);
 
 //static lv_chart_series_t * ser2;
 
@@ -44,10 +46,14 @@ void refresh_chart(void);
 
 ///////////////////// FUNCTIONS ////////////////////
 void refresh_chart(void){
+
 	uint16_t i;
 	for(i = 0; i < 288; i++ ){
-		lv_chart_set_next_value2(ui_Chart1, ser1, wavelength_converted[i], adc_convert(i));
+		lv_chart_set_next_value2(ui_Chart1, ser1, wavelength_converted[i], adc_buf[i]); //adc_convert(i)
 	}
+}
+void refresh_chart_y(void){
+	lv_chart_set_ext_y_array(ui_Chart1, ser1, (lv_coord_t *)adc_buf);
 }
 
 static void ui_event_Button1(lv_event_t * e)
@@ -280,7 +286,7 @@ void ui_Screen2_screen_init(void)
     lv_chart_set_div_line_count(ui_Chart1, 4, 9);
     lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 300, 1024);
     lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
-    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_X, 340, 850);
+    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_X, 400, 750);
 
     lv_chart_set_point_count(ui_Chart1, 288);
 
@@ -294,6 +300,9 @@ void ui_Screen2_screen_init(void)
 
     ser1 = lv_chart_add_series(ui_Chart1, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_CHART_AXIS_SECONDARY_Y);
 
+
+
+
      // ser2 = lv_chart_add_series(ui_Chart1, lv_palette_lighten(LV_PALETTE_DEEP_ORANGE, 2), LV_CHART_AXIS_SECONDARY_Y);
     /*Set the next points on 'ser1'*/
     //lv_chart_set_next_value(ui_Chart1, ser1, 5);
@@ -303,6 +312,7 @@ void ui_Screen2_screen_init(void)
  //lv_chart_set_ext_x_array(ui_Chart1, ser1, (lv_coord_t *)wavelength_converted);
 
     refresh_chart();
+
 
 }
 
