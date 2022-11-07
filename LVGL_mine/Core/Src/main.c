@@ -58,7 +58,8 @@
 uint16_t adc_buf[ADC_BUF_L];
 
 
-float wavelength_converted[288];
+
+uint16_t wavelength_converted[288];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,6 +69,9 @@ void SystemClock_Config(void);
 extern void refresh_chart(void);
 extern void refresh_chart_y(void);
 extern void wavelength_convert(void);
+extern void exposure_time (uint32_t st_us);
+extern void adc_convert_first(void);
+extern void adc_convert_second(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -88,8 +92,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -153,7 +156,7 @@ wavelength_convert();
 
 		if ((HAL_GPIO_ReadPin(GPIOC, B5_Pin)) == 1){
   	    	HAL_Delay(500);
-  	    	__HAL_TIM_SET_AUTORELOAD(&htim2, 10000-1);
+  	    	exposure_time(3000);	// in us. 1/f=1/1MHz=1us=1pulse, min st pulse = 381/f=381us
 					HAL_TIM_PWM_Init(&htim2);
 					HAL_TIM_PWM_Init(&htim4);
 					//HAL_TIM_OC_Init(&htim4);
@@ -238,17 +241,26 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc){
+	adc_convert_first();
+
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 
 	HAL_TIM_OC_Stop(&htim4, TIM_CHANNEL_2);
 	HAL_TIM_OC_Stop(&htim4, TIM_CHANNEL_4);
-	//HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
-	//HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
-	//HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_2);
 
+
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_2);
+
+
+__HAL_TIM_CLEAR_FLAG(&htim2,TIM_FLAG_CC2);
 	//refresh_chart();
 	refresh_chart_y();
-	__HAL_TIM_CLEAR_FLAG(&htim2,TIM_FLAG_CC2);
+
 
 
 }
