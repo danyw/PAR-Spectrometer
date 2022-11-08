@@ -56,6 +56,12 @@
 
 /* USER CODE BEGIN PV */
 uint16_t adc_buf[ADC_BUF_L];
+uint16_t adc_base = 1290;
+bool continous = 0;
+bool averaging = 1;
+uint16_t avg_counter = 0;
+uint16_t avg = 50;
+
 
 
 
@@ -65,6 +71,7 @@ uint16_t wavelength_converted[288];
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+void measure (void);
 
 extern void refresh_chart(void);
 extern void refresh_chart_y(void);
@@ -72,6 +79,7 @@ extern void wavelength_convert(void);
 extern void exposure_time (uint32_t st_us);
 extern void adc_convert_first(void);
 extern void adc_convert_second(void);
+extern void averaging_buf(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -130,7 +138,8 @@ int main(void)
 	HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
 	HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
 
-wavelength_convert();
+	wavelength_convert();
+
 
 	ui_init();
 
@@ -156,13 +165,9 @@ wavelength_convert();
 
 		if ((HAL_GPIO_ReadPin(GPIOC, B5_Pin)) == 1){
   	    	HAL_Delay(500);
-  	    	exposure_time(3000);	// in us. 1/f=1/1MHz=1us=1pulse, min st pulse = 381/f=381us
-					HAL_TIM_PWM_Init(&htim2);
-					HAL_TIM_PWM_Init(&htim4);
-					//HAL_TIM_OC_Init(&htim4);
-					HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
-					HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-					HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_2);
+  	    	exposure_time(200);
+  	    	measure();
+
 
 		}
 
@@ -242,7 +247,9 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc){
+	if (averaging == 0){
 	adc_convert_first();
+	}
 
 }
 
@@ -250,19 +257,21 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 
 	HAL_TIM_OC_Stop(&htim4, TIM_CHANNEL_2);
 	HAL_TIM_OC_Stop(&htim4, TIM_CHANNEL_4);
+	__HAL_TIM_CLEAR_FLAG(&htim2,TIM_FLAG_CC2);
 
+	if (continous == 0 && (averaging == 0 || avg_counter == avg-1)){
+			HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
+			HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+			HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_2);
+	}
 
-	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_2);
-
-
-__HAL_TIM_CLEAR_FLAG(&htim2,TIM_FLAG_CC2);
-	//refresh_chart();
-	refresh_chart_y();
-
-
-
+	if (averaging == 1){
+		averaging_buf();
+	}
+	else {
+		adc_convert_second();
+		refresh_chart_y();
+	}
 }
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
@@ -299,6 +308,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* NOTE : This function should not be modified, when the callback is needed,
             the HAL_TIM_PeriodElapsedCallback could be implemented in the user file
    */
+
+
+void measure (void){
+		HAL_TIM_PWM_Init(&htim2);
+		HAL_TIM_PWM_Init(&htim4);
+		HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+		HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_2);
+}
 
 /* USER CODE END 4 */
 

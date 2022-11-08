@@ -56,7 +56,7 @@ void refresh_chart(void){
 	}
 }
 void refresh_chart_y(void){
-	adc_convert_second();
+
 
 			lv_chart_set_ext_y_array(ui_Chart1, ser1, (lv_coord_t *)adc_converted);
 
@@ -291,7 +291,7 @@ void ui_Screen2_screen_init(void)
     // Copy paste each time
     lv_chart_set_type(ui_Chart1, LV_CHART_TYPE_SCATTER);
     lv_chart_set_div_line_count(ui_Chart1, 4, 9);
-    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 0, 2600);
+    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 0, 2800);
     lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_Y, 0, 1000);
     lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_X, 350, 750);
 

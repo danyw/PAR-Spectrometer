@@ -13,12 +13,24 @@ void wavelength_convert(void);
 void adc_convert_first(void);
 void adc_convert_second(void);
 void exposure_time (uint32_t st_us);
+void averaging_buf(void);
 // float adc_converted_test[288]; For testing purposes
+uint16_t first_pixel = 15;
+uint16_t last_pixel = 227 + 1;
+uint32_t adc_avg[288];
+
+extern uint16_t avg_counter;
+extern uint16_t avg;
 
 extern float wavelength_converted[288];
 extern uint16_t adc_buf[288];
+extern uint16_t adc_base;
+extern uint16_t avg_counter;
+extern void refresh_chart_y(void);
+
 
 uint16_t adc_converted[288];
+
 
 // wavelength correction [nm]
 float wavelength(uint16_t pix){
@@ -73,30 +85,64 @@ const float sensitivity_percent [288]= {
 };
 /* takes into account the sensitivity of module used for the project */
 /* TODO better conversion float to int */
+
+void adc_convert(void){
+	for(uint16_t i = first_pixel; i < last_pixel; i++){
+	adc_converted[i] = (adc_avg[i] - adc_base)  * sensitivity_percent[i];
+	}
+	refresh_chart_y();
+}
+
 void adc_convert_first(void){
-	for(uint16_t i = 15; i < 144; i++){
-	adc_converted[i] = (adc_buf[i] - 1290)  * sensitivity_percent[i];
+	for(uint16_t i = first_pixel; i < 144; i++){
+	adc_converted[i] = (adc_buf[i] - adc_base)  * sensitivity_percent[i];
 
 	}
 }
 	void adc_convert_second(void){
-		for(uint16_t i = 144; i < 227; i++){
-		adc_converted[i] = (adc_buf[i] - 1290)  * sensitivity_percent[i];
-
+		for(uint16_t i = 144; i < last_pixel; i++){
+		adc_converted[i] = (adc_buf[i] - adc_base)  * sensitivity_percent[i];
 		}
-
-// adc_converted_test[i] = adc_converted; Use for testing purposes
-
 }
 
 
 
 void exposure_time (uint32_t st_us){
 	// 1/clk - 1/1MHz = 1us. If clk different convert us to pulses.
-	__HAL_TIM_SET_AUTORELOAD(&htim2, st_us + 1200); //299, changed to higher value to slow down continuous
+	__HAL_TIM_SET_AUTORELOAD(&htim2, st_us + 500); //299, changed to higher value to slow down continuous
 	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, st_us - 1);
 	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, st_us + 85);
 }
+
+
+void averaging_buf(void){
+	if(avg_counter == 0){
+		for(uint16_t i = first_pixel; i < last_pixel; i++){
+			adc_avg[i] = adc_buf[i];
+		}
+		avg_counter++;
+	}
+	else if(avg_counter < avg-1){
+		for(uint16_t i = first_pixel; i < last_pixel; i++){
+				adc_avg[i] += adc_buf[i];
+				}
+				avg_counter++;
+	}
+	else {
+		for(uint16_t i = first_pixel; i < last_pixel; i++){
+						adc_avg[i] = ((adc_buf[i] + adc_avg[i]) / avg);
+						}
+	avg_counter = 0;
+	adc_convert();
+	}
+
+}
+
+
+
+
+
+
 
 /*
 
