@@ -17,6 +17,8 @@ void adc_convert(void);
 void exposure_time (uint32_t st_us);
 void averaging_buf(void);
 void autoexposure(void);
+void peak_wavelength(void);
+void wavelength_range(bool par, uint16_t *first_pixel, uint16_t *last_pixel);
 // float adc_converted_test[288]; For testing purposes
 uint16_t first_pixel = 15;
 uint16_t last_pixel = 201 + 1;
@@ -35,10 +37,21 @@ extern uint16_t avg_counter;
 extern void refresh_chart_y(void);
 extern uint32_t exptime;
 extern void measure (void);
+extern uint16_t peak_pixel;
 
 
 uint16_t adc_converted[288];
 
+void wavelength_range(bool par, uint16_t *first_pixel, uint16_t *last_pixel){
+	if(par == true){
+		*first_pixel = 34;
+		*last_pixel = 169;
+	}
+	else {
+		*first_pixel = 15;
+		*last_pixel = 202;
+	}
+}
 
 // wavelength correction [nm]
 float wavelength(uint16_t pix){
@@ -166,6 +179,7 @@ void averaging_buf(void){
 
 	}
 }
+
 void autoexposure(void){
 	if(exptime > 5000) exptime = exptime - 500;
 	else if (exptime > 3000) exptime = exptime - 200;
@@ -178,6 +192,18 @@ void autoexposure(void){
 	exposure_time(exptime);
 }
 
+void peak_wavelength(void){
+	for(uint16_t i = first_pixel; i < last_pixel; i++){
+		uint16_t max = 0;
+		for(uint16_t i = first_pixel; i < last_pixel; i++){
+			if (adc_converted[i] > max) {
+				max = adc_converted[i];
+				peak_pixel = i;
+			}
+		}
+	}
+
+}
 
 
 

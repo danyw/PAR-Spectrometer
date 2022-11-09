@@ -64,11 +64,12 @@ bool auto_exposure = true;
 uint16_t avg_counter = 0;
 uint16_t avg = 50;
 uint32_t exptime = 5000;
+uint16_t peak_pixel = 0;
 
 
 
 
-uint16_t wavelength_converted[288];
+float wavelength_converted[288];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

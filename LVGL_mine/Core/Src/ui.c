@@ -25,12 +25,17 @@ extern float wavelength_converted[288];
 extern void adc_convert_first(void);
 extern void adc_convert_second(void);
 extern uint16_t adc_converted[288];
-
+extern uint32_t adc_avg[288];
+extern void wavelength_range(bool par, uint16_t *first_pixel, uint16_t *last_pixel);
+extern uint16_t first_pixel;
+extern uint16_t last_pixel;
 
 static lv_chart_series_t * ser1;
+bool hilo = false;
 
 void refresh_chart(void);
 void refresh_chart_y(void);
+void gain(void);
 
 //static lv_chart_series_t * ser2;
 
@@ -60,6 +65,16 @@ void refresh_chart_y(void){
 
 			lv_chart_set_ext_y_array(ui_Chart1, ser1, (lv_coord_t *)adc_converted);
 
+
+}
+
+void gain(void){
+	if(hilo == true) {
+		lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 0, 10000);
+	}
+	else{
+		lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 0, 3500);
+	}
 
 }
 
@@ -291,7 +306,7 @@ void ui_Screen2_screen_init(void)
     // Copy paste each time
     lv_chart_set_type(ui_Chart1, LV_CHART_TYPE_SCATTER);
     lv_chart_set_div_line_count(ui_Chart1, 4, 9);
-    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 0, 3500);
+    lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_SECONDARY_Y, 0, 10000);
     lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_Y, 0, 1000);
     lv_chart_set_range(ui_Chart1, LV_CHART_AXIS_PRIMARY_X, 350, 750);
 
@@ -304,7 +319,7 @@ void ui_Screen2_screen_init(void)
     lv_obj_set_style_size(ui_Chart1, 0, LV_PART_INDICATOR);	// size of a data point
 
     lv_obj_set_style_line_width(ui_Chart1, 1, LV_PART_ITEMS);	// thickness of a line
-
+    wavelength_range(false, &first_pixel, &last_pixel);
     ser1 = lv_chart_add_series(ui_Chart1, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_CHART_AXIS_SECONDARY_Y);
 
 
