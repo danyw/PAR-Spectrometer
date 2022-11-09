@@ -30,17 +30,17 @@ void fautoexposureunchecked(lv_event_t * e)
 	// Your code here
 }
 
-void fexposurechange(lv_event_t * e)
-{
-	// Your code here
-}
-
 void fmeasure(lv_event_t * e)
 {
 	// Your code here
 }
 
 void menuchanged(lv_event_t * e)
+{
+	// Your code here
+}
+
+void fexposurechange(lv_event_t * e)
 {
 	// Your code here
 }
