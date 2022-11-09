@@ -7,26 +7,34 @@
 #include "main.h"
 #include <math.h>
 #include "tim.h"
+#include <stdbool.h>
 
 float wavelength(uint16_t pix);
 void wavelength_convert(void);
 void adc_convert_first(void);
 void adc_convert_second(void);
+void adc_convert(void);
 void exposure_time (uint32_t st_us);
 void averaging_buf(void);
+void autoexposure(void);
 // float adc_converted_test[288]; For testing purposes
 uint16_t first_pixel = 15;
-uint16_t last_pixel = 227 + 1;
+uint16_t last_pixel = 201 + 1;
 uint32_t adc_avg[288];
+uint16_t max_adc = 3820;
+bool overexposed = false;
 
 extern uint16_t avg_counter;
 extern uint16_t avg;
+extern bool auto_exposure;
 
 extern float wavelength_converted[288];
 extern uint16_t adc_buf[288];
 extern uint16_t adc_base;
 extern uint16_t avg_counter;
 extern void refresh_chart_y(void);
+extern uint32_t exptime;
+extern void measure (void);
 
 
 uint16_t adc_converted[288];
@@ -87,10 +95,10 @@ const float sensitivity_percent [288]= {
 /* TODO better conversion float to int */
 
 void adc_convert(void){
-	for(uint16_t i = first_pixel; i < last_pixel; i++){
-	adc_converted[i] = (adc_avg[i] - adc_base)  * sensitivity_percent[i];
-	}
-	refresh_chart_y();
+		for(uint16_t i = first_pixel; i < last_pixel; i++){
+			adc_converted[i] = (adc_avg[i] - adc_base)  * sensitivity_percent[i];
+		}
+		refresh_chart_y();
 }
 
 void adc_convert_first(void){
@@ -125,20 +133,50 @@ void averaging_buf(void){
 	else if(avg_counter < avg-1){
 		for(uint16_t i = first_pixel; i < last_pixel; i++){
 				adc_avg[i] += adc_buf[i];
-				}
+		}
 				avg_counter++;
 	}
 	else {
-		for(uint16_t i = first_pixel; i < last_pixel; i++){
-						adc_avg[i] = ((adc_buf[i] + adc_avg[i]) / avg);
-						}
-	avg_counter = 0;
-	adc_convert();
+		if(auto_exposure == false){
+			for(uint16_t i = first_pixel; i < last_pixel; i++){
+					adc_avg[i] = ((adc_buf[i] + adc_avg[i]) / avg);
+			}
+			avg_counter = 0;
+			adc_convert();
+		}
+		else {
+			for(uint16_t i = first_pixel; i < last_pixel; i++){
+					adc_avg[i] = ((adc_buf[i] + adc_avg[i]) / avg);
+					if(adc_avg[i] > max_adc) overexposed = true;
+			}
+			if(overexposed == true){
+						autoexposure();
+						avg_counter = 0;
+						overexposed = false;
+						measure();
+
+			}
+			else {
+				overexposed = false;
+					avg_counter = 0;
+					adc_convert();
+
+			}
+		}
+
 	}
-
 }
+void autoexposure(void){
+	if(exptime > 5000) exptime = exptime - 500;
+	else if (exptime > 3000) exptime = exptime - 200;
+	else if(exptime > 1500) exptime = exptime - 100;
+	else if(exptime > 1000) exptime = exptime - 50;
+	else if(exptime > 500) exptime = exptime - 20;
+	else if(exptime > 250) exptime = exptime - 10;
+	else exptime = exptime - 1;
 
-
+	exposure_time(exptime);
+}
 
 
 

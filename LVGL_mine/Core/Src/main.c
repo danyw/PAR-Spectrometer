@@ -57,10 +57,13 @@
 /* USER CODE BEGIN PV */
 uint16_t adc_buf[ADC_BUF_L];
 uint16_t adc_base = 1290;
-bool continous = 0;
+bool continous = 1;
 bool averaging = 1;
+//bool overexposed = false;
+bool auto_exposure = true;
 uint16_t avg_counter = 0;
 uint16_t avg = 50;
+uint32_t exptime = 5000;
 
 
 
@@ -165,7 +168,7 @@ int main(void)
 
 		if ((HAL_GPIO_ReadPin(GPIOC, B5_Pin)) == 1){
   	    	HAL_Delay(500);
-  	    	exposure_time(200);
+  	    	exposure_time(exptime);
   	    	measure();
 
 
