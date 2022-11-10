@@ -142,9 +142,10 @@ extern uint32_t adc_avg[288];
 extern void wavelength_range(bool par, uint16_t *first_pixel, uint16_t *last_pixel);
 extern uint16_t first_pixel;
 extern uint16_t last_pixel;
-
+extern uint32_t exptime;
 static lv_chart_series_t * ser1;
 bool hilo = false;
+extern void exposure_time (uint32_t st_us);
 
 void refresh_chart(void);
 void refresh_chart_y(void);
@@ -352,6 +353,8 @@ void ui_event_exposureTimSlider(lv_event_t * e)
     if(event_code == LV_EVENT_VALUE_CHANGED) {
         fexposurechange(e);
         _ui_slider_set_text_value(ui_usLabel, target, "", " us");
+        exptime =  lv_slider_get_value(target);
+        exposure_time (exptime);
     }
 }
 void ui_event_ChartparMeasureButton(lv_event_t * e)
@@ -1300,10 +1303,10 @@ void ui_ChartparScreen_screen_init(void)
     lv_obj_set_style_text_font(ui_measureLabel, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_ChartparChart = lv_chart_create(ui_ChartparScreen);
-    lv_obj_set_width(ui_ChartparChart, lv_pct(74));
-    lv_obj_set_height(ui_ChartparChart, lv_pct(60));
-    lv_obj_set_x(ui_ChartparChart, 15);
-    lv_obj_set_y(ui_ChartparChart, -10);
+    lv_obj_set_width(ui_ChartparChart, lv_pct(68));
+    lv_obj_set_height(ui_ChartparChart, lv_pct(53));
+    lv_obj_set_x(ui_ChartparChart, 38);
+    lv_obj_set_y(ui_ChartparChart, -24);
     lv_obj_set_align(ui_ChartparChart, LV_ALIGN_BOTTOM_LEFT);
     lv_obj_set_style_bg_color(ui_ChartparChart, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_ChartparChart, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1318,16 +1321,17 @@ void ui_ChartparScreen_screen_init(void)
 //here
     lv_chart_set_update_mode(ui_ChartparChart, LV_CHART_UPDATE_MODE_CIRCULAR);
     lv_chart_set_type(ui_ChartparChart, LV_CHART_TYPE_SCATTER);
-    lv_chart_set_range(ui_ChartparChart, LV_CHART_AXIS_SECONDARY_Y, 0, 10000);
+    //lv_chart_set_range(ui_ChartparChart, LV_CHART_AXIS_SECONDARY_Y, 0, 10000);
     lv_chart_set_range(ui_ChartparChart, LV_CHART_AXIS_PRIMARY_Y, 0, 1000);
-    lv_chart_set_range(ui_ChartparChart, LV_CHART_AXIS_PRIMARY_X, 350, 750);
+    lv_chart_set_range(ui_ChartparChart, LV_CHART_AXIS_PRIMARY_X, 400, 700);
     lv_chart_set_point_count(ui_ChartparChart, 288);
-    lv_chart_set_axis_tick(ui_ChartparChart, LV_CHART_AXIS_PRIMARY_X, 8, 3, 5, 2, true, 300);
-    lv_chart_set_axis_tick(ui_ChartparChart, LV_CHART_AXIS_PRIMARY_Y, 5, 5, 6, 1, true, 30);
-    lv_chart_set_axis_tick(ui_ChartparChart, LV_CHART_AXIS_SECONDARY_Y, 5, 5, 4, 1, true, 20);
+    lv_chart_set_axis_tick(ui_ChartparChart, LV_CHART_AXIS_PRIMARY_X, 6, 3, 5, 2, true, 250);
+    lv_chart_set_axis_tick(ui_ChartparChart, LV_CHART_AXIS_PRIMARY_Y, 4, 2, 6, 1, true, 10);
+    lv_chart_set_axis_tick(ui_ChartparChart, LV_CHART_AXIS_SECONDARY_Y, 0, 0, 1, 1, false, 0);
     lv_obj_set_style_size(ui_ChartparChart, 0, LV_PART_INDICATOR);	// size of a data point
     lv_obj_set_style_line_width(ui_ChartparChart, 1, LV_PART_ITEMS);	// thickness of a line
-    wavelength_range(false, &first_pixel, &last_pixel);
+
+    wavelength_range(true, &first_pixel, &last_pixel);
     ser1 = lv_chart_add_series(ui_ChartparChart, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_CHART_AXIS_SECONDARY_Y);
 		refresh_chart();
 //tohere
