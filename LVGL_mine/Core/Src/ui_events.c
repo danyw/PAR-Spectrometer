@@ -30,7 +30,11 @@ void fautoexposureon(lv_event_t * e)
 
 void fautoexposureunchecked(lv_event_t * e)
 {
+<<<<<<< HEAD
 	auto_exposure = false;
+=======
+	// Your code here
+>>>>>>> origin/UserInterface
 }
 
 void fmeasure(lv_event_t * e)
@@ -45,5 +49,9 @@ void menuchanged(lv_event_t * e)
 
 void fexposurechange(lv_event_t * e)
 {
+<<<<<<< HEAD
 	// exposure slider for par
+=======
+	// Your code here
+>>>>>>> origin/UserInterface
 }
