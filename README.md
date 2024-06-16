@@ -71,6 +71,7 @@ Quantum spectrometers are crucial tools used by plant growers, researchers, and 
     <img src="assets/par.png" alt="par" width="350" height="auto">
     </a>
 </div>
+
 ## Goals
 The project aims to design and build a spectrometer capable of measuring the quality and quantity of light within the PAR spectrum, aiding in the design of better LED lamps for planted aquariums.
 ### Implemented Features
@@ -112,10 +113,12 @@ STM32 development board, with additional prototyping PCB and a breadboard was us
 The system is powered by a 9V battery with two voltage regulators. An analog 5V to 3.3V attenuator is used due to the STM32's ADC module's 3.3V maximum input.
 C12880MA has an output impedance 150Ω. A buffer is used as increased current consumption at video output could result in higher dark current.
 Another buffer is added before delivering video signal to ADC. An Op-Amp working as follower was added. STM32 has two Op-Amps embedded. Unfortunately, it was not possible to use both without scarifying performance. The output of embedded Op-Amp I connected internally to the ADC unit. To increase the accuracy, internal voltage reference is replaced with 3.3V external reference.
+
 <div align="center">
     <img src="assets/schematic.png" alt="schematic" max-width="800" height="auto">
     </a>
 </div>
+
 ## ADC
 For this application, Successive-Approximation (SAR)) converter is a better option, because it allows for a higher dynamic range. That is desired for PPFD measurement. The maximum sampling rate available for direct channels with the 16-bit resolution is 3.60 MSPS. By lowering the resolution to 14-bit it is possible to achieve 5.0 MSPS.
 
@@ -131,10 +134,12 @@ The module has a slit size of 50x500 μm, and the aperture is fixed. It is in he
 
 # Software
 Most tasks run in the background using interrupts. The main function handles display updates.
+
 <div align="center">
     <img src="assets/workflow.png" alt="workflow" width="500" height="auto">
     </a>
 </div>
+
 ## Signal generation
 Timers are used to generate signal patterns for controlling integration time and ADC conversion. The integration time and ADC sampling are calibrated for optimal performance using multiple PWM channels and timers.
 
@@ -151,10 +156,12 @@ TIM2 operates as a slave to TIM4 in External Clock Mode 1. When triggered by TIM
 The first PWM signal generates the ST signal high period, the duration of which depends on the user-set exposure time. The PWM signal on channel two measures the time required by the C12880MA for the low period of ST. Upon overflow, it triggers the Output Compare module on TIM4 to start, which in turn initiates the ADC conversion. Once conversion begins, the ADC callback is triggered, stopping the ADC trigger (TIM4 OC), clearing the interrupt flag, and checking for any conditions preventing the completion of the measurement. If none are found, it calls the refresh function, updating the x-axis of the chart with new values.
 
 The ADC uses DMA to transfer data to memory. After the transfer, the data undergoes filtering, conversion, and interpretation, which requires significant resources. To expedite this process, data collection occurs after the conversion of the first 144 pixels and then again after 288 pixels. This is possible because the DMA can be configured to trigger a callback after half of the data transfer. This mode is only functional when averaging is turned off.
+
 <div align="center">
     <img src="assets/signalGeneration.png" alt="signalGeneration" width="300" height="auto">
     </a>
 </div>
+
 ## Display
 The SPI clock is set to 140MHz and then divided by 8 with a prescaler. That gives the baud rate of 17.5 MBits/s. It was possible to go up to 50 MBits/s, but it is not necessary as there are no animations etc. 
 
@@ -172,6 +179,7 @@ $$\frac{1\ \text{MHz}}{5000}=200\ \text{Hz}$$
 
 ## User Interface
 The user interface, created with the LVGL library, allows for simple operation and displays measurement charts. Users can adjust integration time, turn on averaging, and choose measurement modes.
+
 <div align="center">
     <img src="assets/userInterface.png" alt="userInterface" width="700" height="auto">
     </a>
@@ -180,17 +188,21 @@ The user interface, created with the LVGL library, allows for simple operation a
     <img src="assets/gui.png" alt="gui" width="700" height="auto">
     </a>
 </div>
+
 # Calibration
 C12880MA calibration involves three main steps:
 - **Wavelength Calibration:** Converts image sensor pixel numbers to wavelengths using a polynomial equation.
 - **Relative Spectral Response Correction:** Adjusts for non-uniform spectral sensitivity of the C12880MA module.
 - **Absolute Response Calibration:** Requires a homogeneous light entry system (e.g., integrating sphere, diffuser) for precise calibration.
+
 ## Spectral response
 The C12880MA's spectral response is not flat and has lower sensitivity around 800 nm. Calibration data is used to correct for these variations.
+
 <div align="center">
     <img src="assets/spectralResponse.png" alt="spectral response" width="500" height="auto">
     </a>
 </div>
+
 The calibration data for spectral response:
 | **Wavelength [nm]** | **Typical** | **Actual**  | **Normalized** |
 | ------------------- | ----------- | ----------- | -------------- |
@@ -285,11 +297,13 @@ Absolute power calibration is effective in systems with homogenous light entry, 
 The easiest way to achieve absolute calibration is to use either an absolutely calibrated diffused light source (calibrated light source with an integrating sphere) or a calibrated measurement device (calibrated spectrometer). In the latter case, a diffuser is necessary. The next step involves measuring the light source with the spectrometer needing calibration. This allows for creating adjustments; a simple factor is enough since the relative spectrum response is already obtained.
 ## Timing and ADC Measurement
 The spectrometer operates at a maximum frequency of 5 MHz, with an integration time determined by the high period of the start pulse and additional clock pulses. The ADC module's sampling rate and resolution are optimized for the spectrometer's output rate.
+
 <div align="center">
     <img src="assets/timing.png" alt="timing chart" width="600" height="auto">
     </a>
 </div>
- The minimum clock cycles for ST signal high period is $6/f(clk)$. The low period of ST signal is $375/f$. The minimum integrating time is $10.8{\mu s}$. It is because the integrating time is related to the clock speed. The higher the clock speed the higher the dynamic range. To measure high intensities of light it is required to keep the clock high. For the 1 MHz clock the minimum integration time is $54{\mu s}$. The video signal is acquired at the rising edge of the 89th TRG pulse. For this project that signal is not used. Instead, the timing is based on the `clk` generated by the microcontroller, with the additional offset.
+
+The minimum clock cycles for ST signal high period is $6/f(clk)$. The low period of ST signal is $375/f$. The minimum integrating time is $10.8{\mu s}$. It is because the integrating time is related to the clock speed. The higher the clock speed the higher the dynamic range. To measure high intensities of light it is required to keep the clock high. For the 1 MHz clock the minimum integration time is $54{\mu s}$. The video signal is acquired at the rising edge of the 89th TRG pulse. For this project that signal is not used. Instead, the timing is based on the `clk` generated by the microcontroller, with the additional offset.
 
 Calculations for 5MHz clock:
 $$\frac{381}{f}=\frac{381}{5MHz}=76.2\mu s\frac{375}{f}$$
@@ -334,10 +348,12 @@ To measure the light intensity of different sources, a spectrometer needs to hav
 
 **ADC**</br>
 It was later discovered that the maximum sampling rate for the ADC specified by the manufacturer is only valid for BGA packaging. The settling time for LQFP compared to BGA is much longer due to the parasitic inductance added by the LQFP package on the VREF pin. The performance could be improved with a BGA package and a well-designed PCB.
+
 <div align="center">
     <img src="assets/adcSettlingTime.png" alt="adc settling time" width="400" height="auto">
     </a>
 </div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
